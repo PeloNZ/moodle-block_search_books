@@ -73,4 +73,5 @@ $countresults = $countentries;
 // Iterate over results.
 echo search_results($bookresults, $startindex, $endindex, $query, $countresults, $page, $course);
 
+echo $OUTPUT->single_button(new moodle_url($CFG->wwwroot.'/course/view.php', array('id' => $COURSE->id)), get_string('returntocourse', 'block_search_books'));
 echo $OUTPUT->footer();

@@ -32,5 +32,6 @@ $string['for'] = 'for';
 $string['norecordsfound'] = 'No records found';
 $string['results'] = 'Results';
 $string['format'] = 'Select the desired format to view the results';
+$string['returntocourse'] = 'Return to course';
 $string['seconds'] = 'seconds';
 $string['searchresults'] = 'Search book results';

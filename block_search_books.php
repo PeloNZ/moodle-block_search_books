@@ -34,7 +34,7 @@ class block_search_books extends block_base {
     function has_config() {return false;}
 
     function applicable_formats() {
-        return (array('site-index' => true, 'course-view' => true));//, 'course-view-topics' => true));
+        return (array('course-view' => true));
     }
 
     function get_content() {
