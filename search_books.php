@@ -25,7 +25,7 @@
 require_once('../../config.php');
 require_once($CFG->dirroot . '/mod/glossary/lib.php');
 
-define('BOOKMAXRESULTSPERPAGE', 100);  // Limit results per page.
+define('BOOKMAXRESULTSPERPAGE', 10);  // Limit results per page. TODO config setting
 
 $courseid = required_param('courseid', PARAM_INT);
 $query    = required_param('bsquery', PARAM_NOTAGS);
@@ -126,7 +126,7 @@ function search($query, $course, $offset, &$countentries) {
 //////////////////////////////////////////////////////////
 // The main part of this script
 
-$PAGE->set_pagelayout('standard');
+$PAGE->set_pagelayout('course');
 $PAGE->set_url($FULLME);
 
 if (!$course = $DB->get_record('course', array('id' => $courseid))) {
