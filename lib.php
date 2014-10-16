@@ -27,12 +27,9 @@ require_once('/home/chrisw/dev/uniceflocal/config.php');
 function search($query, $course, $offset, &$countentries) {
 
     global $CFG, $USER, $DB;
-var_dump($query);
     if (empty($query)) {
         return false;
     }
-
-    // TODO: Use the search style @ sql.php and use placeholders!
 
     // Perform the search only in books fulfilling mod/book:read and (visible or moodle/course:viewhiddenactivities)
     $bookids = array();
@@ -56,6 +53,7 @@ var_dump($query);
 
     $searchterms = explode(" ",$query);
 
+    // build an array of named parameters to use in the sql query
     $searchparams = array();
     $i = 0;
     foreach ($searchterms as $searchterm) {
@@ -93,12 +91,12 @@ var_dump($query);
         }
     }
 
-    // Add seach conditions in titles and contents.
+    // Add search conditions in titles and contents.
     $where = "AND (( $titlesearch) OR ($contentsearch) ) ";
 
-    // Main query, only to allowed books and not hidden chapters.
     list($insql, $inparams) = $DB->get_in_or_equal($bookids, SQL_PARAMS_NAMED);
 
+    // Main query, only to allowed books and not hidden chapters.
     $sqlselect  = "SELECT DISTINCT bc.*";
     $sqlfrom    = "FROM {book_chapters} bc,
                         {book} b";
@@ -122,15 +120,11 @@ var_dump($query);
         $limitnum = BOOKMAXRESULTSPERPAGE;
     }
 
-    $DB->set_debug(true);
-
     $sqlcount = "select count(*) $sqlfrom $sqlwhere";
     $sqlallentries = "$sqlselect $sqlfrom $sqlwhere $sqlorderby";
-    var_dump($sqlcount, $sqlallentries, $sqlparams, $searchparams);
     $countentries = $DB->count_records_sql($sqlcount, $sqlparams);
-    $allentries = $DB->get_records_sql($sqlallentries, $sqlparams, $limitfrom, $limitnum);
+    $allentries = $DB->get_recordset_sql($sqlallentries, $sqlparams, $limitfrom, $limitnum);
 
-    $DB->set_debug(false);
     return $allentries;
 }
 
@@ -176,7 +170,7 @@ function search_results($bookresults, &$startindex, &$endindex, $query, $countre
             $result = "<li><a href=\"$CFG->wwwroot/mod/book/view.php?id=$cm->id\">".format_string($book->name,true)."</a>&nbsp;&raquo;&nbsp;<a href=\"$CFG->wwwroot/mod/book/view.php?id=$cm->id&amp;chapterid=$entry->id\">".format_string($entry->title,true)."</a></li>";
             $results .= $result;
         }
-//        $bookresults->close();
+        $bookresults->close();
         $results .= '</ul>';
         $results .= $page_bar;
     } else {
