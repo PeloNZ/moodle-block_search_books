@@ -34,16 +34,6 @@ var_dump($query);
 
     // TODO: Use the search style @ sql.php and use placeholders!
 
-    // Some differences in syntax for PostgreSQL.
-    // TODO: Modify this to support also MSSQL and Oracle.
-    if ($CFG->dbfamily == "postgres") {
-        $REGEXP = "~*";
-        $NOTREGEXP = "!~*";
-    } else {
-        $REGEXP = "REGEXP";
-        $NOTREGEXP = "NOT REGEXP";
-    }
-
     // Perform the search only in books fulfilling mod/book:read and (visible or moodle/course:viewhiddenactivities)
     $bookids = array();
     if (! $books = get_all_instances_in_course('book', $course)) {
@@ -66,6 +56,8 @@ var_dump($query);
 
     $searchterms = explode(" ",$query);
 
+    $searchparams = array();
+    $i = 0;
     foreach ($searchterms as $searchterm) {
 
         if ($titlesearch) {
@@ -76,16 +68,28 @@ var_dump($query);
         }
 
         if (substr($searchterm,0,1) == "+") {
+            $REGEXP = $DB->sql_regex(true);
+
             $searchterm = substr($searchterm,1);
-            $titlesearch .= " bc.title $REGEXP '(^|[^a-zA-Z0-9]):searchtitle([^a-zA-Z0-9]|$)' ";
-            $contentsearch .= " bc.content $REGEXP '(^|[^a-zA-Z0-9]):searchcontent([^a-zA-Z0-9]|$)' ";
+            $searchparams['param'.++$i] = "$searchterm";
+            $titlesearch .= " bc.title $REGEXP '(^|[^a-zA-Z0-9]):param{$i}([^a-zA-Z0-9]|$)' ";
+
+            $searchparams['param'.++$i] = "$searchterm";
+            $contentsearch .= " bc.content $REGEXP '(^|[^a-zA-Z0-9]):param{$i}([^a-zA-Z0-9]|$)' ";
         } else if (substr($searchterm,0,1) == "-") {
+            $REGEXP = $DB->sql_regex(false);
+
             $searchterm = substr($searchterm,1);
-            $titlesearch .= " bc.title $NOTREGEXP '(^|[^a-zA-Z0-9]):searchtitle([^a-zA-Z0-9]|$)' ";
-            $contentsearch .= " bc.content $NOTREGEXP '(^|[^a-zA-Z0-9]):searchcontent([^a-zA-Z0-9]|$)' ";
+            $searchparams['param'.++$i] = "$searchterm";
+            $titlesearch .= " bc.title $REGEXP '(^|[^a-zA-Z0-9]):param{$i}([^a-zA-Z0-9]|$)' ";
+
+            $searchparams['param'.++$i] = "$searchterm";
+            $contentsearch .= " bc.content $REGEXP '(^|[^a-zA-Z0-9]):param{$i}([^a-zA-Z0-9]|$)' ";
         } else {
-            $titlesearch .= $DB->sql_like('bc.title', ':searchtitle', false);
-            $contentsearch .= $DB->sql_like('bc.content', ':searchcontent', false);
+            $searchparams['param'.++$i] = "%$searchterm%";
+            $titlesearch .= $DB->sql_like('bc.title', ":param$i", false);
+            $searchparams['param'.++$i] = "%$searchterm%";
+            $contentsearch .= $DB->sql_like('bc.content', ":param$i", false);
         }
     }
 
@@ -107,11 +111,9 @@ var_dump($query);
 
     $queryparams = array(
         'courseid' => $course->id,
-        'searchtitle' => "%$searchterm%",
-        'searchcontent' => "%$searchterm%",
         'hidden' => 0,
     );
-    $sqlparams = array_merge($inparams, $queryparams);
+    $sqlparams = array_merge($inparams, $queryparams, $searchparams);
 
     // Set page limits.
     $limitfrom = $offset;
@@ -124,7 +126,7 @@ var_dump($query);
 
     $sqlcount = "select count(*) $sqlfrom $sqlwhere";
     $sqlallentries = "$sqlselect $sqlfrom $sqlwhere $sqlorderby";
-    var_dump($sqlcount, $sqlallentries, $sqlparams);
+    var_dump($sqlcount, $sqlallentries, $sqlparams, $searchparams);
     $countentries = $DB->count_records_sql($sqlcount, $sqlparams);
     $allentries = $DB->get_records_sql($sqlallentries, $sqlparams, $limitfrom, $limitnum);
 
