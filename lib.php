@@ -116,17 +116,54 @@ function search($query, $course, $offset, &$countentries) {
     return $allentries;
 }
 
-function search_form() {
-$coursefield = '<input type="hidden" name="courseid" value="'.$course->id.'"/>';
-$pagefield = '<input type="hidden" name="page" value="0"/>';
-$searchbox = '<input type="text" name="bsquery" size="20" maxlength="255" value="'.s($query).'"/>';
-$submitbutton = '<input type="submit" name="submit" value="'.$searchbooks.'"/>';
+function search_form($course, $query) {
+    global $CFG;
 
-$content = $coursefield.$pagefield.$searchbox.$submitbutton;
+    $coursefield = '<input type="hidden" name="courseid" value="'.$course->id.'"/>';
+    $pagefield = '<input type="hidden" name="page" value="0"/>';
+    $searchbox = '<input type="text" name="bsquery" size="20" maxlength="255" value="'.s($query).'"/>';
+    $submitbutton = '<input type="submit" name="submit" value="'.get_string('search', 'moodle').'"/>';
 
-$form = '<form method="get" action="'.$CFG->wwwroot.'/blocks/search_books/search_books.php" name="form" id="form">'.$content.'</form>';
+    $content = $coursefield.$pagefield.$searchbox.$submitbutton;
 
-return $form;'<div style="margin-left: auto; margin-right: auto; width: 100%; text-align: center">' . $form . '</div>';
+    $form = '<form method="get" action="'.$CFG->wwwroot.'/blocks/search_books/search_books.php" name="form" id="form">'.$content.'</form>';
+    $form = '<div style="margin-left: auto; margin-right: auto; width: 100%; text-align: center">' . $form . '</div>';
 
+    return $form;
+}
 
+function search_results($bookresults, &$startindex, &$endindex, $query, $countresults, $page, $course) {
+    global $DB, $CFG;
+
+    require_once($CFG->dirroot . '/mod/glossary/lib.php');
+
+    $strresults = get_string('results', 'block_search_books');
+    $ofabout = get_string('ofabout', 'block_search_books');
+    $for = get_string('for', 'block_search_books');
+    // Print results page tip.
+    $page_bar = glossary_get_paging_bar($countresults, $page, BOOKMAXRESULTSPERPAGE, "search_books.php?bsquery=".urlencode(stripslashes($query))."&amp;courseid=$course->id&amp;");
+
+    $results = '';
+    if (!empty($bookresults)) {
+        // Print header
+        $results .= '<p style="text-align: right">'.$strresults.' <b>'.($startindex+1).'</b> - <b>'.$endindex.'</b> '.$ofabout.'<b> '.$countresults.' </b>'.$for.'<b> "'.s($query).'"</b></p>';
+        $results .= $page_bar;
+        // Prepare each entry (hilight, footer...)
+        $results .= '<ul>';
+        foreach ($bookresults as $entry) {
+            $book = $DB->get_record('book', array('id' => $entry->bookid));
+            $cm = get_coursemodule_from_instance("book", $book->id, $course->id);
+
+            //To show where each entry belongs to
+            $result = "<li><a href=\"$CFG->wwwroot/mod/book/view.php?id=$cm->id\">".format_string($book->name,true)."</a>&nbsp;&raquo;&nbsp;<a href=\"$CFG->wwwroot/mod/book/view.php?id=$cm->id&amp;chapterid=$entry->id\">".format_string($entry->title,true)."</a></li>";
+            $results .= $result;
+        }
+//        $bookresults->close();
+        $results .= '</ul>';
+        $results .= $page_bar;
+    } else {
+        $results .= '<br />';
+        $results .= get_string("norecordsfound","block_search_books");
+    }
+    return $results;
 }
