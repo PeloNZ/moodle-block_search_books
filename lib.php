@@ -27,19 +27,19 @@ require_once('/home/chrisw/dev/uniceflocal/config.php');
 function search($query, $course, $offset, &$countentries) {
 
     global $CFG, $USER, $DB;
+var_dump($query);
+    if (empty($query)) {
+        return false;
+    }
 
     // TODO: Use the search style @ sql.php and use placeholders!
 
     // Some differences in syntax for PostgreSQL.
     // TODO: Modify this to support also MSSQL and Oracle.
     if ($CFG->dbfamily == "postgres") {
-        $LIKE = "ILIKE";   // Case-insensitive.
-        $NOTLIKE = "NOT ILIKE";   // Case-insensitive.
         $REGEXP = "~*";
         $NOTREGEXP = "!~*";
     } else {
-        $LIKE = "LIKE";
-        $NOTLIKE = "NOT LIKE";
         $REGEXP = "REGEXP";
         $NOTREGEXP = "NOT REGEXP";
     }
@@ -77,15 +77,15 @@ function search($query, $course, $offset, &$countentries) {
 
         if (substr($searchterm,0,1) == "+") {
             $searchterm = substr($searchterm,1);
-            $titlesearch .= " bc.title $REGEXP '(^|[^a-zA-Z0-9])$searchterm([^a-zA-Z0-9]|$)' ";
-            $contentsearch .= " bc.content $REGEXP '(^|[^a-zA-Z0-9])$searchterm([^a-zA-Z0-9]|$)' ";
+            $titlesearch .= " bc.title $REGEXP '(^|[^a-zA-Z0-9]):searchtitle([^a-zA-Z0-9]|$)' ";
+            $contentsearch .= " bc.content $REGEXP '(^|[^a-zA-Z0-9]):searchcontent([^a-zA-Z0-9]|$)' ";
         } else if (substr($searchterm,0,1) == "-") {
             $searchterm = substr($searchterm,1);
-            $titlesearch .= " bc.title $NOTREGEXP '(^|[^a-zA-Z0-9])$searchterm([^a-zA-Z0-9]|$)' ";
-            $contentsearch .= " bc.content $NOTREGEXP '(^|[^a-zA-Z0-9])$searchterm([^a-zA-Z0-9]|$)' ";
+            $titlesearch .= " bc.title $NOTREGEXP '(^|[^a-zA-Z0-9]):searchtitle([^a-zA-Z0-9]|$)' ";
+            $contentsearch .= " bc.content $NOTREGEXP '(^|[^a-zA-Z0-9]):searchcontent([^a-zA-Z0-9]|$)' ";
         } else {
-            $titlesearch .= " bc.title $LIKE '%$searchterm%' ";
-            $contentsearch .= " bc.content $LIKE '%$searchterm%' ";
+            $titlesearch .= $DB->sql_like('bc.title', ':searchtitle', false);
+            $contentsearch .= $DB->sql_like('bc.content', ':searchcontent', false);
         }
     }
 
@@ -93,15 +93,25 @@ function search($query, $course, $offset, &$countentries) {
     $where = "AND (( $titlesearch) OR ($contentsearch) ) ";
 
     // Main query, only to allowed books and not hidden chapters.
+    list($insql, $inparams) = $DB->get_in_or_equal($bookids, SQL_PARAMS_NAMED);
+
     $sqlselect  = "SELECT DISTINCT bc.*";
-    $sqlfrom    = "FROM {$CFG->prefix}book_chapters bc,
-                        {$CFG->prefix}book b";
-    $sqlwhere   = "WHERE b.course = $course->id AND
-                         b.id IN (" . implode($bookids, ', ') . ") AND
+    $sqlfrom    = "FROM {book_chapters} bc,
+                        {book} b";
+    $sqlwhere   = "WHERE b.course = :courseid AND
+                         b.id $insql AND
                          bc.bookid = b.id AND
-                         bc.hidden = 0
+                         bc.hidden = :hidden
                          $where";
     $sqlorderby = "ORDER BY bc.bookid, bc.pagenum";
+
+    $queryparams = array(
+        'courseid' => $course->id,
+        'searchtitle' => "%$searchterm%",
+        'searchcontent' => "%$searchterm%",
+        'hidden' => 0,
+    );
+    $sqlparams = array_merge($inparams, $queryparams);
 
     // Set page limits.
     $limitfrom = $offset;
@@ -110,9 +120,15 @@ function search($query, $course, $offset, &$countentries) {
         $limitnum = BOOKMAXRESULTSPERPAGE;
     }
 
-    $countentries = $DB->count_records_sql("select count(*) $sqlfrom $sqlwhere", array());
-    $allentries = $DB->get_records_sql("$sqlselect $sqlfrom $sqlwhere $sqlorderby", array(), $limitfrom, $limitnum);
+    $DB->set_debug(true);
 
+    $sqlcount = "select count(*) $sqlfrom $sqlwhere";
+    $sqlallentries = "$sqlselect $sqlfrom $sqlwhere $sqlorderby";
+    var_dump($sqlcount, $sqlallentries, $sqlparams);
+    $countentries = $DB->count_records_sql($sqlcount, $sqlparams);
+    $allentries = $DB->get_records_sql($sqlallentries, $sqlparams, $limitfrom, $limitnum);
+
+    $DB->set_debug(false);
     return $allentries;
 }
 
