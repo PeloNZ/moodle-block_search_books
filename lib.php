@@ -65,30 +65,10 @@ function search($query, $course, $offset, &$countentries) {
             $contentsearch .= " AND ";
         }
 
-        if (substr($searchterm,0,1) == "+") {
-            $REGEXP = $DB->sql_regex(true);
-
-            $searchterm = substr($searchterm,1);
-            $searchparams['param'.++$i] = "$searchterm";
-            $titlesearch .= " bc.title $REGEXP '(^|[^a-zA-Z0-9]):param{$i}([^a-zA-Z0-9]|$)' ";
-
-            $searchparams['param'.++$i] = "$searchterm";
-            $contentsearch .= " bc.content $REGEXP '(^|[^a-zA-Z0-9]):param{$i}([^a-zA-Z0-9]|$)' ";
-        } else if (substr($searchterm,0,1) == "-") {
-            $REGEXP = $DB->sql_regex(false);
-
-            $searchterm = substr($searchterm,1);
-            $searchparams['param'.++$i] = "$searchterm";
-            $titlesearch .= " bc.title $REGEXP '(^|[^a-zA-Z0-9]):param{$i}([^a-zA-Z0-9]|$)' ";
-
-            $searchparams['param'.++$i] = "$searchterm";
-            $contentsearch .= " bc.content $REGEXP '(^|[^a-zA-Z0-9]):param{$i}([^a-zA-Z0-9]|$)' ";
-        } else {
-            $searchparams['param'.++$i] = "%$searchterm%";
-            $titlesearch .= $DB->sql_like('bc.title', ":param$i", false);
-            $searchparams['param'.++$i] = "%$searchterm%";
-            $contentsearch .= $DB->sql_like('bc.content', ":param$i", false);
-        }
+        $searchparams['param'.++$i] = "%$searchterm%";
+        $titlesearch .= $DB->sql_like('bc.title', ":param$i", false);
+        $searchparams['param'.++$i] = "%$searchterm%";
+        $contentsearch .= $DB->sql_like('bc.content', ":param$i", false);
     }
 
     // Add search conditions in titles and contents.
