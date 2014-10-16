@@ -130,7 +130,7 @@ function search_results($bookresults, &$startindex, &$endindex, $query, $countre
     require_once($CFG->dirroot . '/mod/glossary/lib.php');
 
     $strresults = get_string('results', 'block_search_books');
-    $ofabout = get_string('ofabout', 'block_search_books');
+    $of = get_string('of', 'block_search_books');
     $for = get_string('for', 'block_search_books');
     // Print results page tip.
     $page_bar = glossary_get_paging_bar($countresults, $page, BOOKMAXRESULTSPERPAGE, "search_books.php?bsquery=".urlencode(stripslashes($query))."&amp;courseid=$course->id&amp;");
@@ -138,7 +138,7 @@ function search_results($bookresults, &$startindex, &$endindex, $query, $countre
     $results = '';
     if (!empty($bookresults)) {
         // Print header
-        $results .= '<p style="text-align: right">'.$strresults.' <b>'.($startindex+1).'</b> - <b>'.$endindex.'</b> '.$ofabout.'<b> '.$countresults.' </b>'.$for.'<b> "'.s($query).'"</b></p>';
+        $results .= '<p style="text-align: right">'.$strresults.' <b>'.($startindex+1).'</b> - <b>'.$endindex.'</b> '.$of.'<b> '.$countresults.' </b>'.$for.'<b> "'.s($query).'"</b></p>';
         $results .= $page_bar;
         // Prepare each entry (hilight, footer...)
         $results .= '<ul>';

@@ -28,6 +28,7 @@ $string['pluginname'] = 'Search books';
 
 $string['bookssearch'] = 'Search books';
 $string['ofabout'] = 'of about';
+$string['of'] = 'of';
 $string['for'] = 'for';
 $string['norecordsfound'] = 'No records found';
 $string['results'] = 'Results';
