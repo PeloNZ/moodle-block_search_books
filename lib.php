@@ -100,7 +100,7 @@ function search($query, $course, $offset, &$countentries) {
         $limitnum = BOOKMAXRESULTSPERPAGE;
     }
 
-    $sqlcount = "select count(*) $sqlfrom $sqlwhere";
+    $sqlcount = "SELECT COUNT(*) $sqlfrom $sqlwhere";
     $sqlallentries = "$sqlselect $sqlfrom $sqlwhere $sqlorderby";
     $countentries = $DB->count_records_sql($sqlcount, $sqlparams);
     $allentries = $DB->get_recordset_sql($sqlallentries, $sqlparams, $limitfrom, $limitnum);
@@ -138,7 +138,6 @@ function search_results($bookresults, &$startindex, &$endindex, $query, $countre
     $results = '';
     if (!empty($bookresults)) {
         // Print header
-        $results .= '<p style="text-align: right">'.$strresults.' <b>'.($startindex+1).'</b> - <b>'.$endindex.'</b> '.$of.'<b> '.$countresults.' </b>'.$for.'<b> "'.s($query).'"</b></p>';
         $results .= $page_bar;
         // Prepare each entry (hilight, footer...)
         $results .= '<ul>';
@@ -149,8 +148,10 @@ function search_results($bookresults, &$startindex, &$endindex, $query, $countre
             //To show where each entry belongs to
             $result = "<li><a href=\"$CFG->wwwroot/mod/book/view.php?id=$cm->id\">".format_string($book->name,true)."</a>&nbsp;&raquo;&nbsp;<a href=\"$CFG->wwwroot/mod/book/view.php?id=$cm->id&amp;chapterid=$entry->id\">".format_string($entry->title,true)."</a></li>";
             $results .= $result;
+            $endindex++;
         }
         $bookresults->close();
+        $results .= '<p style="text-align: right">'.$strresults.' <b>'.($startindex+1).'</b> - <b>'.($endindex-1).'</b> '.$of.'<b> '.$countresults.' </b>'.$for.'<b> "'.s($query).'"</b></p>';
         $results .= '</ul>';
         $results .= $page_bar;
     } else {

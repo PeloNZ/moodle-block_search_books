@@ -25,7 +25,7 @@
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->dirroot . '/blocks/search_books/lib.php');
 
-define('BOOKMAXRESULTSPERPAGE', get_config('search_books', 'maxresultsperpage'));  // Limit results per page.
+define('BOOKMAXRESULTSPERPAGE', (int) get_config('search_books', 'maxresultsperpage'));  // Limit results per page.
 
 $courseid = required_param('courseid', PARAM_INT);
 $query    = required_param('bsquery', PARAM_NOTAGS);
