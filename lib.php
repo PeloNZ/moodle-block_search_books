@@ -135,27 +135,35 @@ function search_results($bookresults, &$startindex, &$endindex, $query, $countre
     // Print results page tip.
     $page_bar = glossary_get_paging_bar($countresults, $page, BOOKMAXRESULTSPERPAGE, "search_books.php?bsquery=".urlencode(stripslashes($query))."&amp;courseid=$course->id&amp;");
 
-    $results = '';
+    $results = html_writer::start_tag('div', array('class' => 'block_search_books results'));
     if (!empty($bookresults)) {
         // Print header
         $results .= $page_bar;
         // Prepare each entry (hilight, footer...)
-        $results .= '<ul>';
+        $results .= html_writer::start_tag('ul');
         foreach ($bookresults as $entry) {
             $book = $DB->get_record('book', array('id' => $entry->bookid));
             $cm = get_coursemodule_from_instance("book", $book->id, $course->id);
 
             //To show where each entry belongs to
-            $result = "<li><a href=\"$CFG->wwwroot/mod/book/view.php?id=$cm->id\">".format_string($book->name,true)."</a>&nbsp;&raquo;&nbsp;<a href=\"$CFG->wwwroot/mod/book/view.php?id=$cm->id&amp;chapterid=$entry->id\">".format_string($entry->title,true)."</a></li>";
+            $result = html_writer::start_tag('li');
+            $result.= html_writer::link(new moodle_url("/mod/book/view.php", array('id' => $cm->id)), format_string($book->name, true));
+            $result.= "&nbsp;&raquo;&nbsp;";
+            $result.= html_writer::link(new moodle_url("/mod/book/view.php", array('id' => $cm->id, 'chapterid' => $entry->id)), format_string($entry->title, true));
+            $result.= html_writer::end_tag('li');
+
             $results .= $result;
             $endindex++;
         }
         $bookresults->close();
-        $results .= '<p style="text-align: right">'.$strresults.' <b>'.($startindex+1).'</b> - <b>'.($endindex-1).'</b> '.$of.'<b> '.$countresults.' </b>'.$for.'<b> "'.s($query).'"</b></p>';
-        $results .= '</ul>';
+        $results .= html_writer::end_tag('ul');
+        $results .= html_writer::start_tag('div', array('class' => 'results-count'));
+        $results .= html_writer::tag('p', $strresults.' <b>'.($startindex+1).'</b> - <b>'.($endindex-1).'</b> '.$of.'<b> '.$countresults.' </b>'.$for.'<b> "'.s($query).'"</b></p>');
+        $results .= html_writer::end_tag('div');
         $results .= $page_bar;
+        $results .= html_writer::end_tag('div');
     } else {
-        $results .= '<br />';
+        $results .= html_writer::empty_tag('br');
         $results .= get_string("norecordsfound","block_search_books");
     }
     return $results;
