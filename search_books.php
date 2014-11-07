@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('/home/chrisw/dev/uniceflocal/config.php');
+require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once($CFG->dirroot . '/blocks/search_books/lib.php');
 
 define('BOOKMAXRESULTSPERPAGE', get_config('search_books', 'maxresultsperpage'));  // Limit results per page.
