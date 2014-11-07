@@ -49,7 +49,7 @@ class block_search_books extends block_base {
         if ($COURSE->id == $this->page->course->id) {
             $course = $COURSE;
         } else {
-            $course = $DB->get_record('course', array('id' => $this->page->course->id));
+            $course = get_course($this->page->course->id);
         }
 
         // Course not found, we won't do anything in the block

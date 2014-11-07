@@ -37,7 +37,7 @@ $page     = optional_param('page', 0, PARAM_INT);
 $PAGE->set_pagelayout('course');
 $PAGE->set_url($FULLME);
 
-if (!$course = $DB->get_record('course', array('id' => $courseid))) {
+if (!$course = get_course($courseid)) {
     print_error('invalidcourseid');
 }
 
