@@ -31,7 +31,9 @@ class block_search_books extends block_base {
         $this->title = get_string('pluginname','block_search_books');
     }
 
-    function has_config() {return false;}
+    function has_config() {
+        return true;
+    }
 
     function applicable_formats() {
         return (array('course-view' => true));

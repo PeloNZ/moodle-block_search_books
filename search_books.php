@@ -25,7 +25,7 @@
 require_once('/home/chrisw/dev/uniceflocal/config.php');
 require_once($CFG->dirroot . '/blocks/search_books/lib.php');
 
-define('BOOKMAXRESULTSPERPAGE', 10);  // Limit results per page. TODO config setting
+define('BOOKMAXRESULTSPERPAGE', get_config('search_books', 'maxresultsperpage'));  // Limit results per page.
 
 $courseid = required_param('courseid', PARAM_INT);
 $query    = required_param('bsquery', PARAM_NOTAGS);
