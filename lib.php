@@ -135,8 +135,6 @@ function search_results($bookresults, &$startindex, &$endindex, $query, $countre
 
     $results = html_writer::start_tag('div', array('class' => 'block_search_books results'));
     if (!empty($bookresults)) {
-        // Print header
-        $results .= $page_bar;
         // Prepare each entry (hilight, footer...)
         $results .= html_writer::start_tag('ul');
         foreach ($bookresults as $entry) {
