@@ -65,9 +65,9 @@ function search($query, $course, $offset, &$countentries) {
             $contentsearch .= " AND ";
         }
 
-        $searchparams['param'.++$i] = "%$searchterm%";
+        $searchparams['param'.++$i] = '%'.$DB->sql_like_escape($searchterm).'%';
         $titlesearch .= $DB->sql_like('bc.title', ":param$i", false);
-        $searchparams['param'.++$i] = "%$searchterm%";
+        $searchparams['param'.++$i] = '%'.$DB->sql_like_escape($searchterm).'%';
         $contentsearch .= $DB->sql_like('bc.content', ":param$i", false);
     }
 
