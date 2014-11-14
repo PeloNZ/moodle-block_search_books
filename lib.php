@@ -125,15 +125,13 @@ function search_form($course, $query) {
 }
 
 function search_results($bookresults, &$startindex, &$endindex, $query, $countresults, $page, $course) {
-    global $DB, $CFG;
-
-    require_once($CFG->dirroot . '/mod/glossary/lib.php');
+    global $DB, $CFG, $OUTPUT;
 
     $strresults = get_string('results', 'block_search_books');
     $of = get_string('of', 'block_search_books');
     $for = get_string('for', 'block_search_books');
     // Print results page tip.
-    $page_bar = glossary_get_paging_bar($countresults, $page, BOOKMAXRESULTSPERPAGE, "search_books.php?bsquery=".urlencode(stripslashes($query))."&amp;courseid=$course->id&amp;");
+    $page_bar = $OUTPUT->paging_bar($countresults, $page, BOOKMAXRESULTSPERPAGE, "search_books.php?bsquery=".urlencode(stripslashes($query))."&amp;courseid=$course->id&amp;");
 
     $results = html_writer::start_tag('div', array('class' => 'block_search_books results'));
     if (!empty($bookresults)) {
