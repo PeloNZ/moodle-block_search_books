@@ -62,7 +62,7 @@ $query = trim(strip_tags($query));
 // Launch the SQL quey.
 $bookresults = search( $query, $course, $start, $countentries);
 
-//echo search_form($course, $query); // printed in course theme header instead.
+echo search_form($course, $query);
 
 // Process $bookresults, if present.
 $startindex = $start;
