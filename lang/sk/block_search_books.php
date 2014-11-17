@@ -32,5 +32,4 @@ $string['for'] = 'pre';
 $string['norecordsfound'] = 'Nebol nájdený žiaden záznam';
 $string['results'] = 'Výsledok hľadania';
 $string['format'] = 'Zvoľte formát zobrazenia výsledku vyhľadávania';
-$string['seconds'] = 'sekúnd';
 $string['searchresults'] = 'Výsledok vyhľadávania';

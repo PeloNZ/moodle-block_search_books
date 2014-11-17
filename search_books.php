@@ -45,7 +45,6 @@ require_course_login($course);
 
 $strbooks = get_string('modulenameplural', 'book');
 $searchresults = get_string('searchresults', 'block_search_books');
-$seconds = get_string('seconds', 'block_search_books');
 
 $PAGE->navbar->add($strbooks, new moodle_url('/mod/book/index.php', array('id' => $course->id)));
 $PAGE->navbar->add($searchresults);
